@@ -4,21 +4,9 @@ pluginManagement {
         mavenCentral()
         gradlePluginPortal()
     }
-    // 在 CI 环境中，从 @react-native/gradle-plugin 加载（RN 0.76+ 新位置）
-    def gradlePluginDir = new File(rootDir, '../node_modules/@react-native/gradle-plugin')
-    if (gradlePluginDir.exists()) {
-        includeBuild(gradlePluginDir)
-    } else {
-        // 尝试旧位置（向后兼容）
-        gradlePluginDir = new File(rootDir, '../node_modules/react-native/gradle-plugin')
-        if (gradlePluginDir.exists()) {
-            includeBuild(gradlePluginDir)
-        }
-    }
 }
 
-// React Native 设置插件 - 用于 autolink
-plugins { id("com.facebook.react.settings") }
+plugins { id("com.facebook.react.settings") version "0.76.5" }
 
 rootProject.name = 'MobileAgent'
 include ':app'
