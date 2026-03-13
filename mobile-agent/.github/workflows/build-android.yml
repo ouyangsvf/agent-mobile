@@ -20,14 +20,8 @@ jobs:
         echo "=== Current Directory ==="
         pwd
         echo ""
-        echo "=== List all files in root ==="
+        echo "=== List root files ==="
         ls -la
-        echo ""
-        echo "=== Find node_modules ==="
-        find . -maxdepth 3 -name "node_modules" -type d 2>/dev/null
-        echo ""
-        echo "=== Check if mobile-agent exists ==="
-        ls -la mobile-agent/ 2>/dev/null || echo "mobile-agent not found"
         
     - name: Setup JDK 17
       uses: actions/setup-java@v4
@@ -47,13 +41,13 @@ jobs:
         cd mobile-agent
         npm ci --legacy-peer-deps
         
-    - name: Debug - Check paths after npm install
+    - name: Build React Native Gradle Plugin
       run: |
-        echo "=== Check from repo root ==="
-        ls mobile-agent/node_modules/@react-native/gradle-plugin/ 2>/dev/null && echo "Found at mobile-agent/node_modules" || echo "Not at mobile-agent/node_modules"
-        echo ""
-        echo "=== Check from android dir perspective ==="
-        ls mobile-agent/android/../node_modules/@react-native/gradle-plugin/ 2>/dev/null && echo "Found at ../node_modules" || echo "Not at ../node_modules"
+        cd mobile-agent/node_modules/@react-native/gradle-plugin
+        echo "=== Building gradle-plugin ==="
+        chmod +x gradlew
+        ./gradlew publishToMavenLocal --no-daemon --console=plain
+        echo "=== gradle-plugin built ==="
         
     - name: Make Gradle executable
       run: chmod +x mobile-agent/android/gradlew
@@ -61,7 +55,7 @@ jobs:
     - name: Build Release APK
       run: |
         cd mobile-agent/android
-        ./gradlew assembleRelease --no-daemon --console=plain --stacktrace 2>&1 | head -100
+        ./gradlew assembleRelease --no-daemon --console=plain
       env:
         CI: true
         
