@@ -7,6 +7,10 @@ on:
     branches: [ main, master ]
   workflow_dispatch:
 
+env:
+  # 允许使用 Node.js 20（在 2026年6月前有效）
+  ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true
+
 jobs:
   build-android:
     runs-on: ubuntu-latest
