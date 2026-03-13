@@ -1,27 +1,31 @@
-rootProject.name = 'MobileAgent'
-include ':app'
-
-// 尝试加载 React Native gradle-plugin
-// 如果失败，构建仍会继续（使用默认配置）
-try {
-    def reactNativePackageJson = new File(rootDir, '../node_modules/react-native/package.json')
-    if (reactNativePackageJson.exists()) {
-        def reactNativeRoot = reactNativePackageJson.parentFile
-        def gradlePluginDir = new File(reactNativeRoot, 'gradle-plugin')
-        if (gradlePluginDir.exists()) {
-            pluginManagement {
-                includeBuild(gradlePluginDir)
-            }
-        }
-    }
-} catch (Exception e) {
-    logger.warn("Could not load React Native gradle-plugin: ${e.message}")
-}
-
 pluginManagement {
     repositories {
         google()
         mavenCentral()
         gradlePluginPortal()
     }
+    // 在 CI 环境中，尝试从 node_modules 加载 React Native gradle-plugin
+    def reactNativePackageJson = new File(rootDir, '../node_modules/react-native/package.json')
+    if (reactNativePackageJson.exists()) {
+        def reactNativeRoot = reactNativePackageJson.parentFile
+        def gradlePluginDir = new File(reactNativeRoot, 'gradle-plugin')
+        if (gradlePluginDir.exists()) {
+            includeBuild(gradlePluginDir)
+        }
+    }
+}
+
+// React Native 设置插件 - 用于 autolink
+plugins { id("com.facebook.react.settings") }
+
+rootProject.name = 'MobileAgent'
+include ':app'
+
+// 配置 React Native 扩展（如果插件加载成功）
+try {
+    extensions.configure(com.facebook.react.ReactSettingsExtension) { ex ->
+        ex.autolinkLibrariesFromCommand()
+    }
+} catch (Exception e) {
+    logger.warn("ReactSettingsExtension not available: ${e.message}")
 }

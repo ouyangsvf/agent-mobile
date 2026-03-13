@@ -14,7 +14,8 @@ buildscript {
     dependencies {
         classpath('com.android.tools.build:gradle:8.5.0')
         classpath('com.facebook.react:react-native-gradle-plugin')
-        classpath('org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion')
+        // 使用双引号以支持变量插值
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion")
     }
 }
 

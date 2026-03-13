@@ -32,8 +32,18 @@ jobs:
       run: |
         cd mobile-agent
         npm ci --legacy-peer-deps
-        echo "Node modules installed. Contents:"
-        ls -la node_modules/react-native/gradle-plugin/ || echo "WARNING: gradle-plugin not found"
+        
+    - name: Verify React Native setup
+      run: |
+        cd mobile-agent
+        echo "Checking node_modules structure..."
+        if [ -d "node_modules/react-native/gradle-plugin" ]; then
+          echo "✓ React Native gradle-plugin found"
+          ls -la node_modules/react-native/gradle-plugin/
+        else
+          echo "✗ React Native gradle-plugin NOT found"
+          exit 1
+        fi
         
     - name: Make Gradle executable
       run: chmod +x mobile-agent/android/gradlew
@@ -41,17 +51,26 @@ jobs:
     - name: Build Release APK
       run: |
         cd mobile-agent/android
-        ./gradlew assembleRelease --no-daemon --console=plain
+        ./gradlew assembleRelease --no-daemon --console=plain --stacktrace
       env:
         CI: true
         
     - name: List APK files
       run: |
         cd mobile-agent
-        find android/app/build/outputs -name "*.apk" -ls || echo "No APK found"
+        echo "Searching for APK files..."
+        find android -name "*.apk" -ls 2>/dev/null || echo "No APK found"
         
     - name: Upload APK
       uses: actions/upload-artifact@v4
+      if: success()
       with:
         name: app-release
         path: mobile-agent/android/app/build/outputs/apk/release/*.apk
+        
+    - name: Upload build logs on failure
+      uses: actions/upload-artifact@v4
+      if: failure()
+      with:
+        name: build-logs
+        path: mobile-agent/android/build/outputs/logs/
