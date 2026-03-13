@@ -1,10 +1,17 @@
+pluginManagement {
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+    }
+    includeBuild('../node_modules/@react-native/gradle-plugin')
+}
+
+plugins { id("com.facebook.react.settings") }
+
 rootProject.name = 'MobileAgent'
-
-// 传统方法：使用 apply from 加载自动链接
-apply from: file("../node_modules/@react-native-community/cli-platform-android/native_modules.gradle")
-applyNativeModulesSettingsGradle(settings)
-
 include ':app'
 
-// 使用 includeBuild 加载 RN gradle-plugin
-includeBuild('../node_modules/@react-native/gradle-plugin')
+extensions.configure(com.facebook.react.ReactSettingsExtension) { ex ->
+    ex.autolinkLibrariesFromCommand()
+}
