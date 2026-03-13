@@ -1,0 +1,95 @@
+# Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+yarn.lock
+
+# Build
+android/app/build/
+android/build/
+android/gradle/
+android/local.properties
+android/*.iml
+ios/build/
+ios/Pods/
+ios/*.xcworkspace
+ios/*.xcodeproj/xcuserdata
+*.hprof
+
+# Metro
+.expo/
+.metro-health-check*
+
+# Watchman
+.watchmanconfig
+
+# IDEs
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Logs
+logs/
+*.log
+
+# Runtime data
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage
+coverage/
+.nyc_output/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Misc
+*.keystore
+*.jks
+!android/app/debug.keystore
+android/app/my-release-key.keystore
+android/gradle.properties
+
+# Bundle
+*.jsbundle
+*.bundle
+
+# Fastlane
+*/fastlane/report.xml
+*/fastlane/Preview.html
+*/fastlane/screenshots
+
+# Gradle
+.gradle/
+android/gradle/
+android/gradlew
+android/gradlew.bat
+
+# CocoaPods
+/ios/Pods/
+
+# React Native
+android/app/src/main/assets/index.android.bundle
+ios/main.jsbundle
+
+# TypeScript
+*.tsbuildinfo
+
+# Jest
+jest/
+
+# Flipper
+flipper/
+
+# Temporary files
+*.tmp
+*.temp
