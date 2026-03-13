@@ -1,0 +1,2 @@
+# 空 gitmodules 文件 - 用于避免 CI 错误
+# MobileAgent 目录现在作为普通目录管理，不是子模块
