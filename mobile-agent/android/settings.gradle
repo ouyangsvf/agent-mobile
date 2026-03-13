@@ -4,10 +4,12 @@ pluginManagement {
         mavenCentral()
         gradlePluginPortal()
     }
-    // 从本地 node_modules 加载 React Native Gradle 插件
-    def gradlePluginDir = file('../node_modules/@react-native/gradle-plugin')
-    if (gradlePluginDir.exists()) {
-        includeBuild(gradlePluginDir)
+    // 加载 React Native Gradle 插件 - 从 node_modules
+    def rnGradlePlugin = file('../node_modules/@react-native/gradle-plugin')
+    if (rnGradlePlugin.exists()) {
+        includeBuild(rnGradlePlugin)
+    } else {
+        throw new GradleException("React Native gradle-plugin not found at ${rnGradlePlugin.absolutePath}. Did you run npm install?")
     }
 }
 

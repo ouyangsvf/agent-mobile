@@ -10,6 +10,9 @@ on:
 jobs:
   build-android:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: mobile-agent
     
     steps:
     - name: Checkout repository
@@ -30,34 +33,35 @@ jobs:
         
     - name: Install dependencies
       run: |
-        cd mobile-agent
         npm ci --legacy-peer-deps
-        
-    - name: Debug directory structure
-      run: |
-        echo "Current directory: $(pwd)"
-        echo "Contents of root:"
-        ls -la
         echo ""
-        echo "Contents of mobile-agent:"
-        ls -la mobile-agent/
-        echo ""
-        echo "Checking node_modules/@react-native/gradle-plugin:"
-        ls -la mobile-agent/node_modules/@react-native/gradle-plugin/ 2>/dev/null || echo "NOT FOUND"
+        echo "=== Verifying node_modules ==="
+        ls -la node_modules/@react-native/gradle-plugin/ || echo "NOT FOUND!"
         
     - name: Make Gradle executable
-      run: chmod +x mobile-agent/android/gradlew
+      run: chmod +x android/gradlew
       
+    - name: Verify paths
+      run: |
+        echo "Current directory: $(pwd)"
+        echo "Listing contents:"
+        ls -la
+        echo ""
+        echo "Checking android directory:"
+        ls -la android/
+        echo ""
+        echo "Verifying gradle-plugin path from android directory:"
+        ls -la android/../node_modules/@react-native/gradle-plugin/ || echo "Path check failed!"
+        
     - name: Build Release APK
       run: |
-        cd mobile-agent/android
+        cd android
         ./gradlew assembleRelease --no-daemon --console=plain
       env:
         CI: true
         
     - name: List APK files
       run: |
-        cd mobile-agent
         find android -name "*.apk" -ls 2>/dev/null || echo "No APK found"
         
     - name: Upload APK
