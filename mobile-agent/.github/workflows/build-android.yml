@@ -14,9 +14,7 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
-      with:
-        submodules: false  # 不初始化 submodule
-        
+      
     - name: Setup JDK 17
       uses: actions/setup-java@v4
       with:
@@ -31,35 +29,21 @@ jobs:
         cache-dependency-path: mobile-agent/package-lock.json
         
     - name: Install dependencies
-      run: |
-        cd mobile-agent
-        npm ci --legacy-peer-deps
-        
-    - name: Build React Native Gradle Plugin
-      run: |
-        cd mobile-agent/node_modules/@react-native/gradle-plugin
-        chmod +x gradlew
-        ./gradlew build publishToMavenLocal --no-daemon
-        
-    - name: Verify Maven Local
-      run: |
-        echo "=== Maven Local contents ==="
-        ls -la ~/.m2/repository/com/facebook/react/ 2>/dev/null || echo "No react artifacts"
-        find ~/.m2/repository -name "*settings*" -type f 2>/dev/null | head -10
+      working-directory: mobile-agent
+      run: npm ci --legacy-peer-deps
         
     - name: Make Gradle executable
       run: chmod +x mobile-agent/android/gradlew
       
     - name: Build Release APK
-      run: |
-        cd mobile-agent/android
-        ./gradlew assembleRelease --no-daemon --console=plain
+      working-directory: mobile-agent/android
+      run: ./gradlew assembleRelease --no-daemon --console=plain
       env:
         CI: true
         
     - name: List APK files
-      run: |
-        find mobile-agent/android -name "*.apk" -ls 2>/dev/null || echo "No APK found"
+      working-directory: mobile-agent
+      run: find android -name "*.apk" -ls 2>/dev/null || echo "No APK found"
         
     - name: Upload APK
       uses: actions/upload-artifact@v4
