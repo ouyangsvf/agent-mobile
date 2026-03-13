@@ -4,18 +4,18 @@ pluginManagement {
         mavenCentral()
         gradlePluginPortal()
     }
+    // 从本地 node_modules 加载 React Native Gradle 插件
+    def gradlePluginDir = file('../node_modules/@react-native/gradle-plugin')
+    if (gradlePluginDir.exists()) {
+        includeBuild(gradlePluginDir)
+    }
 }
 
-plugins { id("com.facebook.react.settings") version "0.76.5" }
+plugins { id("com.facebook.react.settings") }
 
 rootProject.name = 'MobileAgent'
 include ':app'
 
-// 配置 React Native 扩展
-try {
-    extensions.configure(com.facebook.react.ReactSettingsExtension) { ex ->
-        ex.autolinkLibrariesFromCommand()
-    }
-} catch (Exception e) {
-    logger.warn("ReactSettingsExtension not available: ${e.message}")
+extensions.configure(com.facebook.react.ReactSettingsExtension) { ex ->
+    ex.autolinkLibrariesFromCommand()
 }
