@@ -37,9 +37,13 @@ jobs:
     - name: Make Gradle executable
       run: chmod +x mobile-agent/android/gradlew
       
+    - name: Clean Gradle build
+      working-directory: mobile-agent/android
+      run: ./gradlew clean --no-daemon
+      
     - name: Build Release APK
       working-directory: mobile-agent/android
-      run: ./gradlew assembleRelease --no-daemon --console=plain
+      run: ./gradlew assembleRelease --no-daemon --console=plain --refresh-dependencies
       env:
         CI: true
         
