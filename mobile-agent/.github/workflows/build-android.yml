@@ -10,14 +10,25 @@ on:
 jobs:
   build-android:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: mobile-agent
     
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
       
+    - name: Debug Project Structure
+      run: |
+        echo "=== Current Directory ==="
+        pwd
+        echo ""
+        echo "=== Root Directory Contents ==="
+        ls -la
+        echo ""
+        echo "=== Find node_modules ==="
+        find . -maxdepth 3 -name "node_modules" -type d 2>/dev/null || echo "No node_modules found"
+        echo ""
+        echo "=== Find gradle-plugin ==="
+        find . -maxdepth 4 -name "gradle-plugin" -type d 2>/dev/null || echo "No gradle-plugin found"
+        
     - name: Setup JDK 17
       uses: actions/setup-java@v4
       with:
@@ -32,37 +43,41 @@ jobs:
         cache-dependency-path: mobile-agent/package-lock.json
         
     - name: Install dependencies
+      working-directory: mobile-agent
       run: |
         npm ci --legacy-peer-deps
         echo ""
-        echo "=== Verifying node_modules ==="
-        ls -la node_modules/@react-native/gradle-plugin/ || echo "NOT FOUND!"
+        echo "=== After npm install, checking node_modules ==="
+        ls -la node_modules/@react-native/gradle-plugin/ 2>/dev/null || echo "gradle-plugin not found in mobile-agent"
+        
+    - name: Debug after install
+      run: |
+        echo "=== Checking mobile-agent contents ==="
+        ls -la mobile-agent/
+        echo ""
+        echo "=== Checking node_modules location ==="
+        find mobile-agent -maxdepth 2 -name "node_modules" -type d
         
     - name: Make Gradle executable
-      run: chmod +x android/gradlew
+      run: chmod +x mobile-agent/android/gradlew
       
-    - name: Verify paths
+    - name: Build Release APK
+      working-directory: mobile-agent/android
       run: |
-        echo "Current directory: $(pwd)"
-        echo "Listing contents:"
+        echo "=== Building from $(pwd) ==="
+        echo "=== Contents of current dir ==="
         ls -la
         echo ""
-        echo "Checking android directory:"
-        ls -la android/
+        echo "=== Checking ../node_modules ==="
+        ls -la ../node_modules/@react-native/gradle-plugin/ 2>/dev/null || echo "NOT FOUND at ../node_modules"
         echo ""
-        echo "Verifying gradle-plugin path from android directory:"
-        ls -la android/../node_modules/@react-native/gradle-plugin/ || echo "Path check failed!"
-        
-    - name: Build Release APK
-      run: |
-        cd android
         ./gradlew assembleRelease --no-daemon --console=plain
       env:
         CI: true
         
     - name: List APK files
       run: |
-        find android -name "*.apk" -ls 2>/dev/null || echo "No APK found"
+        find mobile-agent/android -name "*.apk" -ls 2>/dev/null || echo "No APK found"
         
     - name: Upload APK
       uses: actions/upload-artifact@v4
