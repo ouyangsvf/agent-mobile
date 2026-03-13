@@ -1,0 +1,125 @@
+name: Build Android APK
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build-android:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Setup JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        
+    - name: Install dependencies
+      run: |
+        npm ci
+        
+    - name: Make Gradle executable
+      run: chmod +x android/gradlew
+      
+    - name: Build Release APK
+      run: |
+        cd android
+        ./gradlew assembleRelease --no-daemon
+      env:
+        CI: true
+        
+    - name: Sign APK (Debug)
+      run: |
+        cd android/app/build/outputs/apk/release
+        # 检查APK是否存在
+        ls -la
+        
+    - name: Upload APK
+      uses: actions/upload-artifact@v4
+      with:
+        name: app-release-unsigned
+        path: android/app/build/outputs/apk/release/*.apk
+        
+  build-android-signed:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+    needs: build-android
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Setup JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        
+    - name: Install dependencies
+      run: npm ci
+      
+    - name: Make Gradle executable
+      run: chmod +x android/gradlew
+      
+    - name: Generate keystore (for testing)
+      run: |
+        mkdir -p android/app/keystore
+        keytool -genkey -v \
+          -keystore android/app/keystore/release.keystore \
+          -alias release \
+          -keyalg RSA \
+          -keysize 2048 \
+          -validity 10000 \
+          -storepass release123 \
+          -keypass release123 \
+          -dname "CN=Mobile Agent, OU=Dev, O=OpenClaw, L=Beijing, ST=Beijing, C=CN"
+          
+    - name: Build Signed Release APK
+      run: |
+        cd android
+        ./gradlew assembleRelease --no-daemon
+      env:
+        CI: true
+        
+    - name: Sign APK
+      run: |
+        cd android/app/build/outputs/apk/release
+        jarsigner -verbose \
+          -sigalg SHA256withRSA \
+          -digestalg SHA-256 \
+          -keystore ../../../keystore/release.keystore \
+          -storepass release123 \
+          app-release-unsigned.apk \
+          release
+          
+    - name: Align APK
+      run: |
+        cd android/app/build/outputs/apk/release
+        ${ANDROID_SDK_ROOT}/build-tools/35.0.0/zipalign -v 4 \
+          app-release-unsigned.apk \
+          app-release-signed.apk
+          
+    - name: Upload Signed APK
+      uses: actions/upload-artifact@v4
+      with:
+        name: app-release-signed
+        path: android/app/build/outputs/apk/release/app-release-signed.apk
