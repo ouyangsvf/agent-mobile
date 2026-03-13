@@ -37,13 +37,9 @@ jobs:
     - name: Make Gradle executable
       run: chmod +x mobile-agent/android/gradlew
       
-    - name: Clean Gradle build
-      working-directory: mobile-agent/android
-      run: ./gradlew clean --no-daemon
-      
     - name: Build Release APK
       working-directory: mobile-agent/android
-      run: ./gradlew assembleRelease --no-daemon --console=plain --refresh-dependencies
+      run: ./gradlew assembleRelease --no-daemon --console=plain
       env:
         CI: true
         
@@ -51,7 +47,7 @@ jobs:
       working-directory: mobile-agent
       run: find android -name "*.apk" -ls 2>/dev/null || echo "No APK found"
         
-    - name: Upload APK
+    - name: Upload Release APK
       uses: actions/upload-artifact@v4
       if: success()
       with:
