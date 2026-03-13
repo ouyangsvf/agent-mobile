@@ -13,8 +13,7 @@ buildscript {
     }
     dependencies {
         classpath('com.android.tools.build:gradle:8.5.0')
-        classpath('com.facebook.react:react-native-gradle-plugin')
-        // 使用双引号以支持变量插值
+        // 注意：react-native-gradle-plugin 通过 includeBuild 在 settings.gradle 中加载
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion")
     }
 }
