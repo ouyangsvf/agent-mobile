@@ -10,9 +10,6 @@ on:
 jobs:
   build-android:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: mobile-agent
     
     steps:
     - name: Checkout repository
@@ -33,26 +30,28 @@ jobs:
         
     - name: Install dependencies
       run: |
-        npm ci
-        # 验证 node_modules 存在
-        ls -la node_modules/react-native/gradle-plugin/ || echo "gradle-plugin not found!"
+        cd mobile-agent
+        npm ci --legacy-peer-deps
+        echo "Node modules installed. Contents:"
+        ls -la node_modules/react-native/gradle-plugin/ || echo "WARNING: gradle-plugin not found"
         
     - name: Make Gradle executable
-      run: chmod +x android/gradlew
+      run: chmod +x mobile-agent/android/gradlew
       
     - name: Build Release APK
       run: |
-        cd android
+        cd mobile-agent/android
         ./gradlew assembleRelease --no-daemon --console=plain
       env:
         CI: true
         
     - name: List APK files
       run: |
+        cd mobile-agent
         find android/app/build/outputs -name "*.apk" -ls || echo "No APK found"
         
     - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
-        name: app-release-unsigned
+        name: app-release
         path: mobile-agent/android/app/build/outputs/apk/release/*.apk
