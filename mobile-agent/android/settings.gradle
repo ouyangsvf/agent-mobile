@@ -4,25 +4,10 @@ pluginManagement {
         mavenCentral()
         gradlePluginPortal()
     }
-    // 从 node_modules 加载 React Native Gradle 插件
-    // 路径相对于 android/ 目录
-    def gradlePluginPath = file('../node_modules/@react-native/gradle-plugin')
-    if (gradlePluginPath.exists()) {
-        includeBuild(gradlePluginPath)
-    } else {
-        // 尝试备用路径（如果目录结构不同）
-        gradlePluginPath = file('../../node_modules/@react-native/gradle-plugin')
-        if (gradlePluginPath.exists()) {
-            includeBuild(gradlePluginPath)
-        } else {
-            throw new GradleException("""
-                React Native gradle-plugin not found!
-                Tried: 
-                  - ${file('../node_modules/@react-native/gradle-plugin').absolutePath}
-                  - ${file('../../node_modules/@react-native/gradle-plugin').absolutePath}
-                Please ensure 'npm install' has been run.
-            """.stripIndent())
-        }
+    // 加载 React Native Gradle 插件
+    def gradlePluginDir = file('../node_modules/@react-native/gradle-plugin')
+    if (gradlePluginDir.exists()) {
+        includeBuild(gradlePluginDir)
     }
 }
 
